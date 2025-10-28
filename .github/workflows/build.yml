@@ -9,7 +9,7 @@ on:
 jobs:
   build:
     name: Build
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted]
     steps:
       - uses: actions/checkout@v2
         with:
@@ -39,10 +39,10 @@ jobs:
             docker tag swigy-project:latest public.ecr.aws/o1h6f0q2/swigy-project:latest
             docker push public.ecr.aws/o1h6f0q2/swigy-project:latest
             
-            -  deploy:
-          needs: build
-          runs-on: [self-hosted]
-          steps:
+  deploy:
+    needs: build
+    runs-on: [self-hosted]
+    steps:
       - name: docker pull image
         run: docker pull public.ecr.aws/o1h6f0q2/swigy-project:latest
       - name: Image scan
@@ -50,6 +50,6 @@ jobs:
       - name: Deploy to container
         run: docker run -d --name swiggy-clone1 -p 3000:3000 public.ecr.aws/o1h6f0q2/swigy-project:latest
       - name: Update kubeconfig
-        run: aws eks --region ap-south-1 update-kubeconfig --name EKS_CLOUD
+        run: aws eks --region us-east-1 update-kubeconfig --name EKS_CLOUD
       - name: Deploy to kubernetes
         run: kubectl apply -f deployment-using-github-actions/deployment-service.yml --validate=false
